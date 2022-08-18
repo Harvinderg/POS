@@ -1,0 +1,6 @@
+frontend/
+node_modules/
+config/config.env
+package-lock.json
+*.log
+*.gz
