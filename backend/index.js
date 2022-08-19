@@ -1,23 +1,43 @@
 const express = require('express');
 const dotenv = require('dotenv');
 
+const morgan = require('morgan');
+const colors = require('colors');
+
+dotenv.config({ path: './config/config.env' });
+const connectDB = require('./db/dbConnection');
+connectDB();
+
+const logger = require('./middleware/logger');
 const bootCamps = require('./routes/bootcamps');
 
 const app = express();
+//Body Parser
+app.use(express.json());
 
-dotenv.config({ path: './config/config.env' });
+if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
 
 app.use('/api/v1/bootcamps', bootCamps);
 
 const PORT = process.env.PORT || 6000;
 //Add Data again
-app.listen(PORT, (err) => {
+const server = app.listen(PORT, (err) => {
   if (!err)
     console.log(
-      `Server running in ${process.env.NODE_ENV} mode  on PORT ${PORT}`
+      `Server running in ${process.env.NODE_ENV} mode  on PORT ${PORT}`.yellow
+        .bold
     );
   if (err)
     console.log(
-      `Error Starting Server on PORT ${PORT} in ${process.env.NODE_ENV}`
+      `Error Starting Server on PORT ${PORT} in ${process.env.NODE_ENV}`.red
+        .bold
     );
+});
+
+//handle unhandled promise rejection
+process.on('unhandledRejection', (err, promise) => {
+  console.log(`Error: ${err.message}`.yellow.bold);
+
+  //Close Server and exit
+  server.close(() => process.exit(1));
 });
