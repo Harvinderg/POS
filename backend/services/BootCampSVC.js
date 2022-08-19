@@ -11,3 +11,14 @@ exports.getBootCamp = (id) => {
 exports.createBootCamp = (data) => {
   return Bootcamp.create(data);
 };
+
+exports.updateBootCamp = (id, data) => {
+  return Bootcamp.findByIdAndUpdate(id, data, {
+    new: true,
+    runValidators: true,
+  });
+};
+
+exports.deleteBootCamp = (id) => {
+  return Bootcamp.findByIdAndDelete(id);
+};
