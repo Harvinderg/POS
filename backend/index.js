@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 
 const morgan = require('morgan');
 const colors = require('colors');
-
+const errorHandler = require('./middleware/error');
 dotenv.config({ path: './config/config.env' });
 const connectDB = require('./db/dbConnection');
 connectDB();
@@ -19,6 +19,7 @@ if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
 
 app.use('/api/v1/bootcamps', bootCamps);
 
+app.use(errorHandler);
 const PORT = process.env.PORT || 6000;
 //Add Data again
 const server = app.listen(PORT, (err) => {
