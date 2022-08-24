@@ -1,7 +1,20 @@
 const Bootcamp = require('../models/BootCamp');
 
-exports.getAllBootCamp = () => {
-  return Bootcamp.find();
+exports.getAllBootCamp = (
+  queryString,
+  fields,
+  sortBy,
+  page,
+  limit,
+  startIndex
+) => {
+  let query = Bootcamp.find(queryString)
+    .populate('courses')
+    .select(fields)
+    .sort(sortBy)
+    .skip(startIndex)
+    .limit(limit);
+  return query;
 };
 
 exports.getBootCamp = (id) => {
@@ -19,6 +32,10 @@ exports.updateBootCamp = (id, data) => {
   });
 };
 
-exports.deleteBootCamp = (id) => {
+exports.deleteBootCampById = (id) => {
   return Bootcamp.findByIdAndDelete(id);
+};
+
+exports.removeBootcampy = () => {
+  Bootcamp.remove();
 };

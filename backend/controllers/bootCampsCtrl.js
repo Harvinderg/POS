@@ -1,4 +1,5 @@
 const asyncHandler = require('express-async-handler');
+const { JsonWebTokenError } = require('jsonwebtoken');
 
 const BootcampSvc = require('../services/BootCampSVC');
 const ErrorResponse = require('../utils/errorResponse');
@@ -7,8 +8,44 @@ const ErrorResponse = require('../utils/errorResponse');
 // @route   GET /api/v1/bootcamps
 // @access  Public
 const getAllBootCampCtrl = asyncHandler(async (req, res, next) => {
-  console.log(' Get all boot camps');
-  const bootCamps = await BootcampSvc.getAllBootCamp();
+  const reqQuery = { ...req.query };
+
+  const removeFields = ['select', 'sort'];
+
+  removeFields.forEach((param) => delete reqQuery[param]);
+
+  let queryString = JSON.stringify(req.query);
+
+  queryString = queryString.replace(
+    /\b(gt|gte|lt|lte)\b/g,
+    (match) => `$${match}`
+  );
+
+  let fields = [];
+  if (req.query.select) {
+    fields = req.query.select.split(',').join(' ');
+  }
+
+  let sortBy = [];
+  if (req.query.sort) {
+    sortBy = req.query.sort.split(',').join(' ');
+  } else {
+    sortBy = '-createdAt';
+  }
+
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = parseInt(req.query.limit, 10) || 100;
+  const startIndex = (page - 1) * limit;
+  const endIndex = page * limit;
+
+  const bootCamps = await BootcampSvc.getAllBootCamp(
+    JSON.parse(queryString),
+    fields,
+    sortBy,
+    page,
+    limit,
+    startIndex
+  );
   res.status(200).json({
     success: true,
     count: bootCamps.length,
@@ -55,12 +92,13 @@ const updateBootCampCtrl = asyncHandler(async (req, res, next) => {
 });
 
 const deleteBootCampCtrl = asyncHandler(async (req, res, next) => {
-  const bootCamp = await BootcampSvc.deleteBootCamp(req.params.id);
+  const bootCamp = await BootcampSvc.getBootCamp(req.params.id);
   if (!bootCamp) {
     return next(
       new ErrorResponse(`Bootcamp not found with id of ${req.params.id}`, 404)
     );
   }
+  bootCamp.delete();
   res.status(200).json({ success: true, message: 'Bootcamp Deleted' });
 });
 

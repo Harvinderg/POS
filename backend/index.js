@@ -10,7 +10,7 @@ connectDB();
 
 const logger = require('./middleware/logger');
 const bootCamps = require('./routes/bootcamps');
-
+const courses = require('./routes/courses');
 const app = express();
 //Body Parser
 app.use(express.json());
@@ -18,8 +18,9 @@ app.use(express.json());
 if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
 
 app.use('/api/v1/bootcamps', bootCamps);
+app.use('/api/v1/courses', courses);
 
-app.use(errorHandler);
+//app.use(errorHandler());
 const PORT = process.env.PORT || 6000;
 //Add Data again
 const server = app.listen(PORT, (err) => {
